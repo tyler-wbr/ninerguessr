@@ -1,0 +1,93 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@import "leaflet/dist/leaflet.css";
+
+:root {
+  --color-charlotte-green: #005035;
+  --color-niner-gold: #a49665;
+  --color-quartz-white: #ffffff;
+  color-scheme: light;
+}
+
+html,
+body {
+  height: 100%;
+}
+
+body {
+  @apply bg-niner-white text-niner-green antialiased;
+}
+
+.leaflet-container {
+  height: 100%;
+  width: 100%;
+  background: #f4f6f5;
+}
+
+@layer components {
+  .btn-primary {
+    @apply rounded bg-niner-green text-niner-white px-4 py-2 font-medium transition-opacity hover:opacity-90 disabled:opacity-50;
+  }
+
+  .btn-accent {
+    @apply rounded bg-niner-gold text-niner-green px-4 py-2 font-semibold transition-opacity hover:opacity-90 disabled:opacity-50;
+  }
+
+  .btn-outline {
+    @apply rounded border-2 border-niner-gold text-niner-green px-4 py-2 font-medium transition-colors hover:bg-niner-gold/10;
+  }
+
+  .card {
+    @apply rounded-lg border border-niner-green/15 bg-niner-white;
+  }
+
+  .input-field {
+    @apply mt-1 block w-full rounded border border-niner-green/25 bg-niner-white px-3 py-2 text-niner-green placeholder:text-niner-green/40 focus:border-niner-green focus:outline-none focus:ring-1 focus:ring-niner-green;
+  }
+
+  .label {
+    @apply text-sm font-medium text-niner-green;
+  }
+
+  .text-muted {
+    @apply text-niner-green/60;
+  }
+
+  .table-head {
+    @apply text-left text-niner-green/60;
+  }
+
+  .table-row {
+    @apply border-t border-niner-green/10;
+  }
+
+  .page-title {
+    @apply text-2xl font-bold text-niner-green;
+  }
+
+  .link-brand {
+    @apply text-niner-green underline decoration-niner-gold/60 underline-offset-2 hover:decoration-niner-gold;
+  }
+
+  .hero-nav-link {
+    @apply block py-2.5 text-xl font-medium text-niner-white transition-colors hover:text-niner-gold sm:text-2xl sm:py-3;
+  }
+
+  .hero-divider {
+    @apply h-px w-full max-w-xs bg-niner-white/25;
+  }
+
+  .hero-pill {
+    @apply inline-flex items-center justify-center rounded-full px-4 py-2 text-sm font-medium transition-all;
+  }
+
+  .hero-pill-outline {
+    @apply border border-niner-white/40 bg-niner-green/40 text-niner-white backdrop-blur-sm hover:border-niner-gold hover:bg-niner-green/60 hover:text-niner-gold;
+  }
+
+  .hero-pill-gold {
+    @apply bg-niner-gold text-niner-green hover:opacity-90;
+  }
+}
