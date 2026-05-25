@@ -316,7 +316,7 @@ export default function GameClient(props: GameClientProps) {
       <img
         src={photoUrl}
         alt={`Round ${round}`}
-        className="fixed inset-0 h-[100dvh] w-full object-cover object-center"
+        className="play-round-photo"
       />
 
       <div className="absolute inset-x-0 top-0 z-20 border-b border-niner-white/10 bg-niner-green/70 px-3 py-2.5 backdrop-blur-md pt-[max(0.625rem,env(safe-area-inset-top))] sm:px-4 sm:py-3">
@@ -394,7 +394,7 @@ export default function GameClient(props: GameClientProps) {
         </div>
       )}
 
-      <div className="absolute bottom-[5.5rem] right-3 z-20 sm:bottom-28 sm:right-6">
+      <div className="absolute bottom-[calc(6.75rem+env(safe-area-inset-bottom))] right-3 z-20 sm:bottom-28 sm:right-6">
         <MapPreviewThumb
           onClick={() => setMapOpen(true)}
           label={revealed ? "Map" : "Map"}

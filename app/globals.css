@@ -119,6 +119,17 @@ body {
     @apply text-sm font-medium text-niner-gold underline decoration-niner-gold/50 underline-offset-4 transition-colors hover:text-niner-white hover:decoration-niner-gold;
   }
 
+  /* Play: show full photo on portrait phones; cover when landscape */
+  .play-round-photo {
+    @apply fixed inset-0 z-0 h-[100dvh] w-full bg-niner-green object-contain object-center;
+  }
+
+  @media (orientation: landscape) {
+    .play-round-photo {
+      @apply object-cover;
+    }
+  }
+
   .hero-input {
     @apply mt-1 block w-full rounded-lg border border-niner-white/30 bg-niner-white/10 px-3 py-2.5 text-niner-white placeholder:text-niner-white/50 focus:border-niner-gold focus:outline-none focus:ring-1 focus:ring-niner-gold;
   }

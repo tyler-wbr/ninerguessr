@@ -11,9 +11,9 @@ export type Profile = {
 
 export type Location = {
   id: string;
-  image_path: string;
-  lat: number;
-  lng: number;
+  image_path: string | null;
+  lat: number | null;
+  lng: number | null;
   difficulty: Difficulty;
   title: string | null;
   hint: string | null;
@@ -38,7 +38,7 @@ export type Game = {
 export type GameRound = {
   id: string;
   game_id: string;
-  location_id: string;
+  location_id: string | null;
   round_number: number;
   round_difficulty: Difficulty | null;
   guess_lat: number | null;

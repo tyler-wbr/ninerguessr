@@ -17,8 +17,12 @@ export default function DeleteLocationButton({ id }: { id: string }) {
           const r = await fetch(`/api/admin/locations/${id}`, {
             method: "DELETE",
           });
-          if (r.ok) router.refresh();
-          else alert("Delete failed");
+          if (r.ok) {
+            router.refresh();
+            return;
+          }
+          const err = await r.json().catch(() => ({}));
+          alert(err.error ?? "Delete failed");
         });
       }}
     >

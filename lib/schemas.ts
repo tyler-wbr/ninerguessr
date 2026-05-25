@@ -24,9 +24,9 @@ export const guessSchema = z.object({
 });
 
 export const createLocationSchema = z.object({
-  image_path: z.string().min(1),
-  lat: z.number().gte(-90).lte(90),
-  lng: z.number().gte(-180).lte(180),
+  image_path: z.string().min(1).optional().nullable(),
+  lat: z.number().gte(-90).lte(90).optional().nullable(),
+  lng: z.number().gte(-180).lte(180).optional().nullable(),
   difficulty: difficultySchema,
   title: z.string().max(120).optional().nullable(),
   hint: z.string().max(500).optional().nullable(),

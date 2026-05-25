@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { createAdminSupabaseClient } from "@/lib/supabase/admin";
+import { isLocationComplete } from "@/lib/locationValidation";
 import type { Location } from "@/lib/supabase/types";
 import DeleteLocationButton from "./DeleteLocationButton";
 import TogglePublishButton from "./TogglePublishButton";
@@ -32,7 +33,10 @@ export default async function AdminPage() {
       <div className="grid sm:grid-cols-3 gap-4 mb-8 text-center">
         {(["easy", "medium", "hard"] as const).map((d) => {
           const all = byDifficulty[d];
-          const published = all.filter((l) => l.is_published).length;
+          const published = all.filter(
+            (l) => l.is_published && isLocationComplete(l),
+          ).length;
+          const drafts = all.filter((l) => !isLocationComplete(l)).length;
           return (
             <div key={d} className="card border-t-4 border-t-niner-gold p-4">
               <div className="text-sm uppercase text-muted">{d}</div>
@@ -40,7 +44,10 @@ export default async function AdminPage() {
                 {published}{" "}
                 <span className="text-niner-gold text-base">/ {all.length}</span>
               </div>
-              <div className="text-xs text-muted">published / total</div>
+              <div className="text-xs text-muted">
+                published / total
+                {drafts > 0 && ` · ${drafts} draft${drafts === 1 ? "" : "s"}`}
+              </div>
             </div>
           );
         })}
@@ -52,28 +59,44 @@ export default async function AdminPage() {
             <th className="py-2">Title</th>
             <th>Difficulty</th>
             <th>Coords</th>
-            <th>Published</th>
+            <th>Status</th>
             <th></th>
           </tr>
         </thead>
         <tbody>
-          {list.map((l) => (
+          {list.map((l) => {
+            const complete = isLocationComplete(l);
+            const canPublish = complete;
+            return (
             <tr key={l.id} className="table-row">
               <td className="py-2">
                 {l.title ?? <em className="text-muted">untitled</em>}
               </td>
               <td className="capitalize">{l.difficulty}</td>
               <td className="font-mono text-xs text-muted">
-                {l.lat.toFixed(5)}, {l.lng.toFixed(5)}
+                {l.lat != null && l.lng != null
+                  ? `${l.lat.toFixed(5)}, ${l.lng.toFixed(5)}`
+                  : "—"}
               </td>
               <td>
-                <TogglePublishButton id={l.id} isPublished={l.is_published} />
+                <TogglePublishButton
+                  id={l.id}
+                  isPublished={l.is_published}
+                  canPublish={canPublish}
+                />
               </td>
-              <td>
+              <td className="text-right whitespace-nowrap">
+                <Link
+                  href={`/admin/${l.id}/edit`}
+                  className="text-xs text-niner-green hover:underline mr-3"
+                >
+                  Edit
+                </Link>
                 <DeleteLocationButton id={l.id} />
               </td>
             </tr>
-          ))}
+          );
+          })}
           {list.length === 0 && (
             <tr>
               <td colSpan={5} className="py-8 text-center text-muted">

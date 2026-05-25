@@ -58,7 +58,10 @@ async function startCasualGame(
     .from("locations")
     .select("id, image_path")
     .eq("difficulty", difficulty)
-    .eq("is_published", true);
+    .eq("is_published", true)
+    .not("image_path", "is", null)
+    .not("lat", "is", null)
+    .not("lng", "is", null);
   if (poolErr) {
     return NextResponse.json({ error: "db_error" }, { status: 500 });
   }
@@ -136,7 +139,10 @@ async function startDailyGame(
   const { data: allLocs, error: locErr } = await admin
     .from("locations")
     .select("id, image_path, difficulty")
-    .eq("is_published", true);
+    .eq("is_published", true)
+    .not("image_path", "is", null)
+    .not("lat", "is", null)
+    .not("lng", "is", null);
   if (locErr) {
     return NextResponse.json({ error: "db_error" }, { status: 500 });
   }

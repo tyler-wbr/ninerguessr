@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { getServerUser } from "@/lib/supabase/server";
 import { createAdminSupabaseClient } from "@/lib/supabase/admin";
 import { createLocationSchema } from "@/lib/schemas";
+import { validateLocationWrite } from "@/lib/locationValidation";
 
 export async function GET() {
   const { user, profile } = await getServerUser();
@@ -31,6 +32,12 @@ export async function POST(req: Request) {
       { status: 400 },
     );
   }
+
+  const validation = validateLocationWrite(parsed.data);
+  if (!validation.ok) {
+    return NextResponse.json({ error: validation.error }, { status: 400 });
+  }
+
   const admin = createAdminSupabaseClient();
   const { data, error } = await admin
     .from("locations")

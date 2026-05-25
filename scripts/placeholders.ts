@@ -10,11 +10,11 @@ type Placeholder = {
   svg: string;
 };
 
-function makeSvg(label: string, bg: string) {
+function makeSvg(difficulty: string, bg: string) {
   return `<?xml version="1.0" encoding="UTF-8"?>
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 600">
   <rect width="800" height="600" fill="${bg}"/>
-  <text x="400" y="310" text-anchor="middle" font-family="sans-serif" font-size="42" fill="#fff" font-weight="bold">${label}</text>
+  <text x="400" y="310" text-anchor="middle" font-family="sans-serif" font-size="42" fill="#fff" font-weight="bold">${difficulty}</text>
   <text x="400" y="350" text-anchor="middle" font-family="sans-serif" font-size="18" fill="#fff" opacity="0.75">placeholder</text>
 </svg>`;
 }
@@ -26,7 +26,7 @@ export const PLACEHOLDERS: Placeholder[] = [
     title: "Belk Tower",
     lat: 35.3075,
     lng: -80.7348,
-    svg: makeSvg("Easy 1 - Belk Tower", "#005035"),
+    svg: makeSvg("Easy", "#005035"),
   },
   {
     key: "seed/easy-2.svg",
@@ -34,7 +34,7 @@ export const PLACEHOLDERS: Placeholder[] = [
     title: "Student Union",
     lat: 35.308,
     lng: -80.733,
-    svg: makeSvg("Easy 2 - Student Union", "#005035"),
+    svg: makeSvg("Easy", "#005035"),
   },
   {
     key: "seed/medium-1.svg",
@@ -42,7 +42,7 @@ export const PLACEHOLDERS: Placeholder[] = [
     title: "Atkins Library quad",
     lat: 35.3068,
     lng: -80.7322,
-    svg: makeSvg("Medium 1 - Atkins quad", "#A49665"),
+    svg: makeSvg("Medium", "#A49665"),
   },
   {
     key: "seed/medium-2.svg",
@@ -50,7 +50,7 @@ export const PLACEHOLDERS: Placeholder[] = [
     title: "Botanical Gardens path",
     lat: 35.3093,
     lng: -80.7281,
-    svg: makeSvg("Medium 2 - Botanical Gardens", "#A49665"),
+    svg: makeSvg("Medium", "#A49665"),
   },
   {
     key: "seed/hard-1.svg",
@@ -58,7 +58,7 @@ export const PLACEHOLDERS: Placeholder[] = [
     title: "South Village walkway",
     lat: 35.3045,
     lng: -80.7295,
-    svg: makeSvg("Hard 1 - South Village", "#005035"),
+    svg: makeSvg("Hard", "#005035"),
   },
   {
     key: "seed/hard-2.svg",
@@ -66,7 +66,7 @@ export const PLACEHOLDERS: Placeholder[] = [
     title: "Greek Village",
     lat: 35.305,
     lng: -80.7385,
-    svg: makeSvg("Hard 2 - Greek Village", "#005035"),
+    svg: makeSvg("Hard", "#005035"),
   },
 ];
 
