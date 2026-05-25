@@ -1,11 +1,9 @@
 "use client";
 
-import { useRouter } from "next/navigation";
 import { useTransition } from "react";
 import { createBrowserSupabaseClient } from "@/lib/supabase/browser";
 
 export default function SignOutButton({ className }: { className?: string }) {
-  const router = useRouter();
   const [pending, start] = useTransition();
   const supabase = createBrowserSupabaseClient();
 
@@ -16,8 +14,7 @@ export default function SignOutButton({ className }: { className?: string }) {
       onClick={() => {
         start(async () => {
           await supabase.auth.signOut();
-          router.refresh();
-          router.push("/");
+          window.location.assign("/");
         });
       }}
       className={

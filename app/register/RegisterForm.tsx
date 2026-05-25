@@ -1,7 +1,6 @@
 "use client";
 
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { createBrowserSupabaseClient } from "@/lib/supabase/browser";
 import HeroButton from "@/components/HeroButton";
@@ -16,7 +15,6 @@ function FieldError({ message }: { message?: string }) {
 }
 
 export default function RegisterForm() {
-  const router = useRouter();
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [displayName, setDisplayName] = useState("");
@@ -72,8 +70,7 @@ export default function RegisterForm() {
       );
       return;
     }
-    router.refresh();
-    router.push("/");
+    window.location.assign("/");
   }
 
   function clearFieldError(field: keyof RegistrationFieldErrors) {

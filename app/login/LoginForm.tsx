@@ -1,7 +1,6 @@
 "use client";
 
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { createBrowserSupabaseClient } from "@/lib/supabase/browser";
 import HeroButton from "@/components/HeroButton";
@@ -13,7 +12,6 @@ function FieldError({ message }: { message?: string }) {
 }
 
 export default function LoginForm({ next }: { next: string }) {
-  const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [emailError, setEmailError] = useState<string | undefined>();
@@ -48,8 +46,7 @@ export default function LoginForm({ next }: { next: string }) {
       setError(signInError.message);
       return;
     }
-    router.refresh();
-    router.push(next);
+    window.location.assign(next);
   }
 
   return (
