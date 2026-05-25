@@ -1,8 +1,8 @@
 import { NextResponse } from "next/server";
 import { getServerUser } from "@/lib/supabase/server";
 import { createAdminSupabaseClient } from "@/lib/supabase/admin";
-
-const ROUNDS = Number(process.env.GAME_ROUNDS ?? 5);
+import { totalRoundsForMode } from "@/lib/gameConfig";
+import type { GameMode } from "@/lib/gameConfig";
 
 export async function POST(
   _req: Request,
@@ -16,7 +16,7 @@ export async function POST(
 
   const { data: game, error } = await admin
     .from("games")
-    .select("id, user_id, status, total_score")
+    .select("id, user_id, status, total_score, game_mode")
     .eq("id", gameId)
     .maybeSingle();
   if (error || !game) {
@@ -29,6 +29,8 @@ export async function POST(
     return NextResponse.json({ gameId, totalScore: game.total_score });
   }
 
+  const totalRounds = totalRoundsForMode(game.game_mode as GameMode);
+
   const { data: rounds, error: roundsErr } = await admin
     .from("game_rounds")
     .select("points, guessed_at")
@@ -37,7 +39,8 @@ export async function POST(
     return NextResponse.json({ error: "db_error" }, { status: 500 });
   }
 
-  const allGuessed = rounds.length === ROUNDS && rounds.every((r) => r.guessed_at);
+  const allGuessed =
+    rounds.length === totalRounds && rounds.every((r) => r.guessed_at);
   if (!allGuessed) {
     return NextResponse.json({ error: "not_all_rounds_guessed" }, { status: 409 });
   }

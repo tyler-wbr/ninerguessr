@@ -3,11 +3,16 @@ import { getServerUser } from "@/lib/supabase/server";
 import { createAdminSupabaseClient } from "@/lib/supabase/admin";
 import { guessSchema } from "@/lib/schemas";
 import { rateLimitGameGuess } from "@/lib/rateLimit";
-import { haversineMeters, scoreFromDistance } from "@/lib/scoring";
+import {
+  haversineMeters,
+  scoreFromDistance,
+  scoreFromDistanceAndTime,
+} from "@/lib/scoring";
 import { isWithinCampus } from "@/lib/geo";
 import { signPhotoUrl } from "@/lib/photoUrl";
-
-const ROUNDS = Number(process.env.GAME_ROUNDS ?? 5);
+import { DAILY_TIME_LIMIT_MS, totalRoundsForMode } from "@/lib/gameConfig";
+import type { GameMode } from "@/lib/gameConfig";
+import type { Difficulty } from "@/lib/supabase/types";
 
 export async function POST(
   req: Request,
@@ -32,7 +37,7 @@ export async function POST(
 
   const { data: game, error: gameErr } = await admin
     .from("games")
-    .select("id, user_id, status, current_round")
+    .select("id, user_id, status, current_round, game_mode, challenge_date, difficulty, started_at")
     .eq("id", gameId)
     .maybeSingle();
   if (gameErr || !game) {
@@ -45,10 +50,13 @@ export async function POST(
     return NextResponse.json({ error: "game_finished" }, { status: 409 });
   }
 
+  const gameMode = game.game_mode as GameMode;
+  const totalRounds = totalRoundsForMode(gameMode);
+
   const { data: round, error: roundErr } = await admin
     .from("game_rounds")
     .select(
-      "id, round_number, location_id, guess_lat, guess_lng, distance_m, points, guessed_at",
+      "id, round_number, location_id, round_difficulty, round_started_at, guess_lat, guess_lng, distance_m, distance_points, time_ms, points, guessed_at",
     )
     .eq("game_id", gameId)
     .eq("round_number", game.current_round)
@@ -66,23 +74,54 @@ export async function POST(
     return NextResponse.json({ error: "location_missing" }, { status: 500 });
   }
 
-  // Idempotency: if this round already has a guess, return the stored result.
   if (round.guessed_at) {
     return buildResponse({
       admin,
       gameId,
+      gameMode,
+      totalRounds,
       currentRound: round.round_number,
-      isFinal: round.round_number === ROUNDS,
+      isFinal: round.round_number === totalRounds,
       distance_m: round.distance_m!,
+      distancePoints: round.distance_points ?? round.points!,
+      timeMs: round.time_ms ?? 0,
       points: round.points!,
       actual: { lat: loc.lat, lng: loc.lng },
-      gameStatus: game.status,
+      roundDifficulty: round.round_difficulty as Difficulty | null,
     });
   }
 
+  const roundStartedAt =
+    round.round_started_at ?? game.started_at ?? new Date().toISOString();
+  const elapsedMs = Date.now() - new Date(roundStartedAt).getTime();
+
   const distance_m = haversineMeters(lat, lng, loc.lat, loc.lng);
   const inBounds = isWithinCampus(lat, lng);
-  const points = inBounds ? scoreFromDistance(distance_m) : 0;
+
+  let distancePoints = 0;
+  let timeMs = 0;
+  let timeMult = 1;
+  let points = 0;
+
+  if (inBounds) {
+    if (gameMode === "daily") {
+      const scored = scoreFromDistanceAndTime(
+        distance_m,
+        elapsedMs,
+        undefined,
+        DAILY_TIME_LIMIT_MS,
+      );
+      distancePoints = scored.distancePoints;
+      timeMs = scored.timeMs;
+      timeMult = scored.timeMultiplier;
+      points = scored.points;
+    } else {
+      distancePoints = scoreFromDistance(distance_m);
+      points = distancePoints;
+    }
+  }
+
+  const now = new Date().toISOString();
 
   const { error: updErr } = await admin
     .from("game_rounds")
@@ -90,75 +129,120 @@ export async function POST(
       guess_lat: lat,
       guess_lng: lng,
       distance_m,
+      distance_points: distancePoints,
+      time_ms: gameMode === "daily" ? timeMs : null,
       points,
-      guessed_at: new Date().toISOString(),
+      guessed_at: now,
+      round_started_at: roundStartedAt,
     })
     .eq("id", round.id);
   if (updErr) {
     return NextResponse.json({ error: "db_error" }, { status: 500 });
   }
 
-  const isFinal = round.round_number === ROUNDS;
+  const isFinal = round.round_number === totalRounds;
   if (!isFinal) {
+    const nextRoundNum = round.round_number + 1;
     await admin
       .from("games")
-      .update({ current_round: round.round_number + 1 })
+      .update({ current_round: nextRoundNum })
       .eq("id", gameId);
+    await admin
+      .from("game_rounds")
+      .update({ round_started_at: now })
+      .eq("game_id", gameId)
+      .eq("round_number", nextRoundNum);
   }
 
   return buildResponse({
     admin,
     gameId,
+    gameMode,
+    totalRounds,
     currentRound: round.round_number,
     isFinal,
     distance_m,
+    distancePoints,
+    timeMs,
+    timeMultiplier: timeMult,
     points,
     actual: { lat: loc.lat, lng: loc.lng },
     outOfBounds: !inBounds,
-    gameStatus: game.status,
+    roundDifficulty: round.round_difficulty as Difficulty | null,
+    nextRoundStartedAt: isFinal ? null : now,
   });
 }
 
 async function buildResponse(args: {
   admin: ReturnType<typeof createAdminSupabaseClient>;
   gameId: string;
+  gameMode: GameMode;
+  totalRounds: number;
   currentRound: number;
   isFinal: boolean;
   distance_m: number;
+  distancePoints: number;
+  timeMs?: number;
+  timeMultiplier?: number;
   points: number;
   actual: { lat: number; lng: number };
   outOfBounds?: boolean;
-  gameStatus: string;
+  roundDifficulty: Difficulty | null;
+  nextRoundStartedAt?: string | null;
 }) {
-  const { admin, gameId, currentRound, isFinal, distance_m, points, actual } =
-    args;
+  const {
+    admin,
+    gameId,
+    gameMode,
+    totalRounds,
+    currentRound,
+    isFinal,
+    distance_m,
+    distancePoints,
+    timeMs,
+    timeMultiplier,
+    points,
+    actual,
+    roundDifficulty,
+    nextRoundStartedAt,
+  } = args;
 
   let nextPhotoUrl: string | null = null;
+  let nextRoundDifficulty: Difficulty | null = null;
   if (!isFinal) {
     const { data: nextRound } = await admin
       .from("game_rounds")
-      .select("location_id")
+      .select("location_id, round_difficulty, locations(image_path)")
       .eq("game_id", gameId)
       .eq("round_number", currentRound + 1)
       .maybeSingle();
     if (nextRound) {
-      const { data: nextLoc } = await admin
-        .from("locations")
-        .select("image_path")
-        .eq("id", nextRound.location_id)
-        .maybeSingle();
+      nextRoundDifficulty = nextRound.round_difficulty as Difficulty | null;
+      const locRaw = nextRound.locations as
+        | { image_path: string }
+        | { image_path: string }[]
+        | null;
+      const nextLoc = Array.isArray(locRaw) ? locRaw[0] : locRaw;
       if (nextLoc) nextPhotoUrl = await signPhotoUrl(nextLoc.image_path);
     }
   }
 
   return NextResponse.json({
     round: currentRound,
-    totalRounds: ROUNDS,
+    totalRounds,
+    gameMode,
+    roundDifficulty,
     distance_m: Math.round(distance_m),
+    distancePoints,
+    timeMs: timeMs ?? null,
+    timeMultiplier: timeMultiplier ?? null,
     points,
     actual,
     outOfBounds: args.outOfBounds ?? false,
     isFinal,
     nextPhotoUrl,
+    nextRoundDifficulty,
+    roundStartedAt: nextRoundStartedAt ?? null,
+    timeLimitMs: gameMode === "daily" ? DAILY_TIME_LIMIT_MS : null,
   });
 }

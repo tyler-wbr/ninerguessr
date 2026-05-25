@@ -1,10 +1,22 @@
 import { z } from "zod";
 
 export const difficultySchema = z.enum(["easy", "medium", "hard"]);
+export const gameModeSchema = z.enum(["casual", "daily"]);
 
-export const startGameSchema = z.object({
-  difficulty: difficultySchema,
-});
+export const startGameSchema = z
+  .object({
+    mode: gameModeSchema.default("casual"),
+    difficulty: difficultySchema.optional(),
+  })
+  .superRefine((data, ctx) => {
+    if (data.mode === "casual" && !data.difficulty) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "difficulty required for casual games",
+        path: ["difficulty"],
+      });
+    }
+  });
 
 export const guessSchema = z.object({
   lat: z.number().gte(-90).lte(90),

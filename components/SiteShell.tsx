@@ -5,6 +5,16 @@ import SiteHeader from "@/components/SiteHeader";
 import SiteFooter from "@/components/SiteFooter";
 import type { Profile } from "@/lib/supabase/types";
 
+function isImmersiveRoute(pathname: string): boolean {
+  if (pathname === "/") return true;
+  if (pathname === "/login" || pathname === "/register") return true;
+  if (pathname === "/leaderboard" || pathname === "/profile") return true;
+  if (pathname === "/challenge" || pathname.startsWith("/challenge/")) return true;
+  if (pathname.startsWith("/play")) return true;
+  if (pathname.startsWith("/results/")) return true;
+  return false;
+}
+
 export default function SiteShell({
   children,
   user,
@@ -15,9 +25,8 @@ export default function SiteShell({
   profile: Profile | null;
 }) {
   const pathname = usePathname();
-  const isHome = pathname === "/";
 
-  if (isHome) {
+  if (isImmersiveRoute(pathname)) {
     return <>{children}</>;
   }
 

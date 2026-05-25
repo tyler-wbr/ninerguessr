@@ -48,7 +48,7 @@ Default seeded admin: `admin@example.com` / `Passw0rd!`. Change `SEED_ADMIN_EMAI
    - `NEXT_PUBLIC_SUPABASE_URL` — Project URL (must match the `ref` embedded in your keys)
    - `NEXT_PUBLIC_SUPABASE_ANON_KEY` — **Publishable** key (`sb_publishable_...`) or legacy anon JWT
    - `SUPABASE_SERVICE_ROLE_KEY` — **Secret** key (`sb_secret_...`) or legacy service_role JWT (server-only; never commit)
-3. In the SQL editor, run [supabase/migrations/0001_init.sql](supabase/migrations/0001_init.sql) then [supabase/migrations/0002_rls.sql](supabase/migrations/0002_rls.sql). Choose **Run and enable RLS** for `0001`, then run `0002` immediately after.
+3. In the SQL editor, run [supabase/migrations/0001_init.sql](supabase/migrations/0001_init.sql), [supabase/migrations/0002_rls.sql](supabase/migrations/0002_rls.sql), and [supabase/migrations/0003_daily_challenge.sql](supabase/migrations/0003_daily_challenge.sql) in order. Choose **Run and enable RLS** for `0001`, then run `0002` and `0003` immediately after.
 4. Storage: the seed script auto-creates a **private** bucket called `location-photos`. If you prefer to make it yourself, create it under Storage and disable public access.
 5. **Email confirmations:** in Authentication → Providers → Email, decide whether you want email confirmation on. For local dev you may want it off so signups log in immediately.
 6. (Optional but recommended) Upstash Redis for rate limiting:
@@ -92,13 +92,26 @@ Tips:
 - Avoid identifiable people in frame.
 - Note the capture date in the title if it's a seasonal-only landmark.
 
+## Daily Challenge
+
+The **Daily Challenge** (`/challenge`) is fully automatic — no manual setup each day.
+
+- **6 rounds:** 2 easy, 2 medium, 2 hard (same locations for everyone on a given day)
+- **Scoring:** distance points × speed bonus (60s per round by default)
+- **One attempt per day** per user (in-progress games can be resumed)
+- **Leaderboard:** `/leaderboard?board=daily`
+
+Locations are picked deterministically from the date + `DAILY_CHALLENGE_SALT` (set in env). The day rolls over at midnight in `CHALLENGE_TIMEZONE` (default `America/New_York`). You need at least **2 published locations per difficulty** for the challenge to be available.
+
+Optional env vars (see `.env.example`): `DAILY_CHALLENGE_SALT`, `DAILY_ROUND_TIME_SEC`, `CHALLENGE_TIMEZONE`.
+
 ## Deploy checklist (Vercel + Supabase)
 
 Use this before sharing the app publicly.
 
 ### Supabase (one-time)
 
-- [ ] Migrations `0001_init.sql` and `0002_rls.sql` applied to the production project
+- [ ] Migrations `0001_init.sql`, `0002_rls.sql`, and `0003_daily_challenge.sql` applied to the production project
 - [ ] `location-photos` storage bucket exists (private)
 - [ ] **Authentication → URL Configuration** — Site URL set to your production domain (keep `http://localhost:3000` for local dev)
 - [ ] Email confirmation setting matches how you want signup to work

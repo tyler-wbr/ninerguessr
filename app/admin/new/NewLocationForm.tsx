@@ -7,6 +7,7 @@ import {
   campusBoundaryLatLng,
   campusCenter,
 } from "@/lib/mapConfig";
+import { readGpsFromImageFile } from "@/lib/exif";
 import type { Difficulty } from "@/lib/supabase/types";
 
 const AdminPickerMap = dynamic(
@@ -26,6 +27,23 @@ export default function NewLocationForm() {
   );
   const [error, setError] = useState<string | null>(null);
   const [pending, setPending] = useState(false);
+  const [exifNote, setExifNote] = useState<string | null>(null);
+  const [mapKey, setMapKey] = useState(0);
+
+  async function onFileChange(next: File | null) {
+    setFile(next);
+    setExifNote(null);
+    if (!next) return;
+
+    const gps = await readGpsFromImageFile(next);
+    if (gps) {
+      setCoords(gps);
+      setMapKey((k) => k + 1);
+      setExifNote(
+        "GPS from photo applied — drag the pin on the map to fine-tune if needed.",
+      );
+    }
+  }
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -86,7 +104,7 @@ export default function NewLocationForm() {
           type="file"
           accept="image/*"
           required
-          onChange={(e) => setFile(e.target.files?.[0] ?? null)}
+          onChange={(e) => onFileChange(e.target.files?.[0] ?? null)}
           className="mt-1 block w-full text-sm text-niner-green file:mr-4 file:rounded file:border-0 file:bg-niner-green file:px-3 file:py-1.5 file:text-sm file:font-medium file:text-niner-white hover:file:opacity-90"
         />
       </label>
@@ -125,11 +143,16 @@ export default function NewLocationForm() {
         />
       </label>
 
+      {exifNote && (
+        <p className="text-sm text-niner-green">{exifNote}</p>
+      )}
+
       <div>
         <div className="label mb-1">Click the map to set the location</div>
-        <div className="h-80 rounded overflow-hidden border border-niner-green/25">
+        <div className="h-64 sm:h-80 rounded overflow-hidden border border-niner-green/25">
           <AdminPickerMap
-            center={campusCenter}
+            key={mapKey}
+            center={coords ?? campusCenter}
             boundary={campusBoundaryLatLng}
             initial={coords}
             onChange={(lat, lng) => setCoords({ lat, lng })}

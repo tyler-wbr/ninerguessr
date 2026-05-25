@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { createBrowserSupabaseClient } from "@/lib/supabase/browser";
+import HeroButton from "@/components/HeroButton";
 
 export default function RegisterForm() {
   const router = useRouter();
@@ -49,29 +50,29 @@ export default function RegisterForm() {
   return (
     <form onSubmit={onSubmit} className="space-y-4">
       <label className="block">
-        <span className="label">Display name</span>
+        <span className="hero-label">Display name</span>
         <input
           type="text"
           required
           maxLength={40}
           value={displayName}
           onChange={(e) => setDisplayName(e.target.value)}
-          className="input-field"
+          className="hero-input"
         />
       </label>
       <label className="block">
-        <span className="label">Email</span>
+        <span className="hero-label">Email</span>
         <input
           type="email"
           required
           autoComplete="email"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
-          className="input-field"
+          className="hero-input"
         />
       </label>
       <label className="block">
-        <span className="label">Password</span>
+        <span className="hero-label">Password</span>
         <input
           type="password"
           required
@@ -79,17 +80,17 @@ export default function RegisterForm() {
           autoComplete="new-password"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
-          className="input-field"
+          className="hero-input"
         />
       </label>
-      {error && <p className="text-sm text-red-600">{error}</p>}
-      {message && <p className="text-sm text-niner-green">{message}</p>}
-      <button type="submit" disabled={pending} className="w-full btn-primary">
+      {error && <p className="text-sm text-red-300">{error}</p>}
+      {message && <p className="text-sm text-niner-gold">{message}</p>}
+      <HeroButton type="submit" variant="primary" fullWidth disabled={pending}>
         {pending ? "Creating account…" : "Create account"}
-      </button>
-      <p className="text-sm text-muted">
+      </HeroButton>
+      <p className="text-center text-sm text-niner-white/70">
         Already have an account?{" "}
-        <Link href="/login" className="link-brand">
+        <Link href="/login" className="text-niner-gold hover:underline">
           Log in
         </Link>
       </p>

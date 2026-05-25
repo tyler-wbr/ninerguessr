@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { createBrowserSupabaseClient } from "@/lib/supabase/browser";
+import HeroButton from "@/components/HeroButton";
 
 export default function LoginForm({ next }: { next: string }) {
   const router = useRouter();
@@ -33,34 +34,34 @@ export default function LoginForm({ next }: { next: string }) {
   return (
     <form onSubmit={onSubmit} className="space-y-4">
       <label className="block">
-        <span className="label">Email</span>
+        <span className="hero-label">Email</span>
         <input
           type="email"
           required
           autoComplete="email"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
-          className="input-field"
+          className="hero-input"
         />
       </label>
       <label className="block">
-        <span className="label">Password</span>
+        <span className="hero-label">Password</span>
         <input
           type="password"
           required
           autoComplete="current-password"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
-          className="input-field"
+          className="hero-input"
         />
       </label>
-      {error && <p className="text-sm text-red-600">{error}</p>}
-      <button type="submit" disabled={pending} className="w-full btn-primary">
+      {error && <p className="text-sm text-red-300">{error}</p>}
+      <HeroButton type="submit" variant="primary" fullWidth disabled={pending}>
         {pending ? "Logging in…" : "Log in"}
-      </button>
-      <p className="text-sm text-muted">
+      </HeroButton>
+      <p className="text-center text-sm text-niner-white/70">
         New here?{" "}
-        <Link href="/register" className="link-brand">
+        <Link href="/register" className="text-niner-gold hover:underline">
           Create an account
         </Link>
       </p>

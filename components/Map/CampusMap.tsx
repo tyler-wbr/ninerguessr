@@ -1,6 +1,6 @@
 "use client";
 
-import { MapContainer, TileLayer, Polygon, AttributionControl } from "react-leaflet";
+import { MapContainer, TileLayer, Polygon, AttributionControl, useMap } from "react-leaflet";
 import type { LatLngExpression, LatLngBoundsExpression } from "leaflet";
 import { BRAND } from "@/lib/brand";
 import { useEffect } from "react";
@@ -18,6 +18,14 @@ export type CampusMapProps = {
   className?: string;
   children?: React.ReactNode;
 };
+
+function MapResizeOnMount() {
+  const map = useMap();
+  useEffect(() => {
+    map.invalidateSize();
+  }, [map]);
+  return null;
+}
 
 /**
  * Base campus map. Loads OpenStreetMap tiles. The campus boundary (if given)
@@ -56,6 +64,7 @@ export default function CampusMap({
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
         />
         <AttributionControl position="bottomright" prefix={false} />
+        <MapResizeOnMount />
         {boundary && (
           <Polygon
             positions={boundary}

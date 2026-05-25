@@ -4,6 +4,8 @@ import {
   haversineMeters,
   scoreFromDistance,
   defaultScoreConfig,
+  timeMultiplier,
+  scoreFromDistanceAndTime,
 } from "./scoring";
 
 describe("haversineMeters", () => {
@@ -34,5 +36,37 @@ describe("scoreFromDistance", () => {
   it("decays smoothly between full credit and cutoff", () => {
     const mid = scoreFromDistance(200, cfg);
     assert.ok(mid > 0 && mid < cfg.maxPoints);
+  });
+});
+
+describe("timeMultiplier", () => {
+  it("returns 1 at zero elapsed", () => {
+    assert.equal(timeMultiplier(0, 60_000), 1);
+  });
+
+  it("returns 0.5 at the limit", () => {
+    assert.equal(timeMultiplier(60_000, 60_000), 0.5);
+  });
+
+  it("does not go below 0.5", () => {
+    assert.equal(timeMultiplier(120_000, 60_000), 0.5);
+  });
+});
+
+describe("scoreFromDistanceAndTime", () => {
+  const cfg = defaultScoreConfig();
+
+  it("combines distance and time", () => {
+    const r = scoreFromDistanceAndTime(10, 0, cfg, 60_000);
+    assert.equal(r.distancePoints, cfg.maxPoints);
+    assert.equal(r.points, cfg.maxPoints);
+    assert.equal(r.timeMs, 0);
+  });
+
+  it("applies time penalty at half the limit", () => {
+    const r = scoreFromDistanceAndTime(10, 30_000, cfg, 60_000);
+    assert.equal(r.distancePoints, cfg.maxPoints);
+    assert.equal(r.timeMultiplier, 0.75);
+    assert.equal(r.points, Math.round(cfg.maxPoints * 0.75));
   });
 });

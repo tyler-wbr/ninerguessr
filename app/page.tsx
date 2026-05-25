@@ -1,7 +1,10 @@
-import Image from "next/image";
-import Link from "next/link";
 import { getServerUser } from "@/lib/supabase/server";
-import HomeAuthButtons from "@/components/HomeAuthButtons";
+import { getHomeDailyStats } from "@/lib/homeStats";
+import HeroLayout from "@/components/HeroLayout";
+import HeroAuthButtons from "@/components/HeroAuthButtons";
+import HeroButton from "@/components/HeroButton";
+import HowToPlay from "@/components/HowToPlay";
+import HomeDailyStatsBar from "@/components/HomeDailyStatsBar";
 
 const DIFFICULTIES = [
   { id: "easy", label: "Play Easy" },
@@ -16,81 +19,66 @@ function playHref(difficulty: string, loggedIn: boolean) {
 }
 
 export default async function HomePage() {
-  const { user, profile } = await getServerUser();
+  const [{ user, profile }, dailyStats] = await Promise.all([
+    getServerUser(),
+    getHomeDailyStats(),
+  ]);
 
   return (
-    <div className="relative min-h-screen overflow-hidden">
-      <Image
-        src="/images/campus-hero.jpg"
-        alt=""
-        fill
-        priority
-        className="object-cover object-center"
-        sizes="100vw"
-      />
+    <HeroLayout topRight={<HeroAuthButtons user={user} profile={profile} />}>
+      <div className="flex min-h-[100dvh] flex-col items-center justify-center px-4 py-[max(5rem,env(safe-area-inset-top))] pb-[env(safe-area-inset-bottom)] sm:px-6">
+        <div className="w-full max-w-sm">
+          <div className="hero-copy-panel text-center">
+            <h1 className="text-4xl font-bold tracking-tight text-niner-white sm:text-5xl">
+              Niner Guessr
+            </h1>
+            <p className="mt-3 text-sm font-medium text-niner-white/95 sm:text-base">
+              Know Your Campus? Prove It.
+            </p>
+            <HomeDailyStatsBar stats={dailyStats} />
+          </div>
 
-      <div
-        className="absolute inset-0 bg-gradient-to-r from-niner-green/95 via-niner-green/80 to-niner-green/20"
-        aria-hidden
-      />
-      <div
-        className="absolute inset-0 bg-gradient-to-t from-niner-green/50 via-transparent to-transparent sm:hidden"
-        aria-hidden
-      />
+          <div className="mt-6 flex flex-col gap-3">
+            <HeroButton href="/challenge" variant="primary" fullWidth>
+              Daily Challenge
+            </HeroButton>
 
-      <div className="absolute right-6 top-6 z-20 sm:right-10 sm:top-10">
-        <HomeAuthButtons user={user} profile={profile} />
-      </div>
-
-      <div className="relative z-10 flex min-h-screen flex-col px-6 pb-8 pt-16 sm:px-10 sm:pb-10 sm:pt-20 md:px-14 lg:px-20">
-        <div className="max-w-md flex-1">
-          <h1 className="text-4xl font-bold tracking-tight text-niner-white sm:text-5xl lg:text-6xl">
-            Niner Guessr
-          </h1>
-          <p className="mt-2 text-sm text-niner-white/70 sm:text-base">
-            Drop a pin. Score points. Know your campus.
-          </p>
-
-          <div className="hero-divider mt-8" />
-
-          <nav className="mt-6 flex flex-col" aria-label="Main">
             {DIFFICULTIES.map((d) => (
-              <Link
+              <HeroButton
                 key={d.id}
                 href={playHref(d.id, !!user)}
-                className="hero-nav-link"
+                variant="primary"
+                fullWidth
               >
                 {d.label}
-              </Link>
+              </HeroButton>
             ))}
 
-            <div className="hero-divider my-2" />
-
-            <Link href="/leaderboard" className="hero-nav-link">
+            <HeroButton href="/leaderboard" variant="secondary" fullWidth>
               Leaderboard
-            </Link>
+            </HeroButton>
 
             {user && (
               <>
-                <Link href="/profile" className="hero-nav-link">
+                <HeroButton href="/profile" variant="secondary" fullWidth>
                   Profile
-                </Link>
+                </HeroButton>
                 {profile?.is_admin && (
-                  <Link href="/admin" className="hero-nav-link">
+                  <HeroButton href="/admin" variant="secondary" fullWidth>
                     Admin
-                  </Link>
+                  </HeroButton>
                 )}
               </>
             )}
-          </nav>
-        </div>
+          </div>
 
-        <footer className="mt-auto pt-8">
-          <p className="max-w-lg text-xs text-niner-white/45">
-            Five rounds · 5,000 points each · Not affiliated with UNC Charlotte
+          <HowToPlay />
+
+          <p className="mt-8 text-center text-xs leading-relaxed text-niner-white/80 [text-shadow:0_1px_6px_rgba(0,32,21,0.85)]">
+            Not affiliated with UNC Charlotte
           </p>
-        </footer>
+        </div>
       </div>
-    </div>
+    </HeroLayout>
   );
 }

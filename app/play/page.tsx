@@ -21,5 +21,5 @@ export default async function PlayPage({
     redirect("/");
   }
 
-  return <GameClient difficulty={difficulty} />;
+  return <GameClient mode="casual" difficulty={difficulty} />;
 }

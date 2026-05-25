@@ -1,5 +1,6 @@
 export type Difficulty = "easy" | "medium" | "hard";
 export type GameStatus = "in_progress" | "completed" | "abandoned";
+export type GameMode = "casual" | "daily";
 
 export type Profile = {
   id: string;
@@ -24,7 +25,9 @@ export type Location = {
 export type Game = {
   id: string;
   user_id: string;
-  difficulty: Difficulty;
+  difficulty: Difficulty | null;
+  game_mode: GameMode;
+  challenge_date: string | null;
   status: GameStatus;
   total_score: number;
   current_round: number;
@@ -37,9 +40,13 @@ export type GameRound = {
   game_id: string;
   location_id: string;
   round_number: number;
+  round_difficulty: Difficulty | null;
   guess_lat: number | null;
   guess_lng: number | null;
   distance_m: number | null;
+  distance_points: number | null;
+  time_ms: number | null;
   points: number | null;
+  round_started_at: string | null;
   guessed_at: string | null;
 };

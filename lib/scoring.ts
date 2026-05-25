@@ -50,3 +50,30 @@ export function scoreFromDistance(
   const t = (distanceM - full) / (zero - full);
   return Math.max(0, Math.round(max * Math.pow(1 - t, 1.5)));
 }
+
+/** 1.0 at instant submit, 0.5 at the time limit. */
+export function timeMultiplier(
+  elapsedMs: number,
+  limitMs: number = Number(process.env.DAILY_ROUND_TIME_SEC ?? 60) * 1000,
+): number {
+  if (limitMs <= 0) return 1;
+  const ratio = Math.min(1, Math.max(0, elapsedMs / limitMs));
+  return 0.5 + 0.5 * (1 - ratio);
+}
+
+export function scoreFromDistanceAndTime(
+  distanceM: number,
+  elapsedMs: number,
+  cfg: ScoreConfig = defaultScoreConfig(),
+  limitMs: number = Number(process.env.DAILY_ROUND_TIME_SEC ?? 60) * 1000,
+): { distancePoints: number; timeMultiplier: number; points: number; timeMs: number } {
+  const cappedMs = Math.min(Math.max(0, elapsedMs), limitMs);
+  const distancePoints = scoreFromDistance(distanceM, cfg);
+  const mult = timeMultiplier(cappedMs, limitMs);
+  return {
+    distancePoints,
+    timeMultiplier: mult,
+    points: Math.round(distancePoints * mult),
+    timeMs: cappedMs,
+  };
+}
