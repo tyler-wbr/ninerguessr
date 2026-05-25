@@ -5,6 +5,8 @@ export type GameMode = "casual" | "daily";
 export type Profile = {
   id: string;
   display_name: string;
+  first_name: string | null;
+  last_name: string | null;
   is_admin: boolean;
   created_at: string;
 };

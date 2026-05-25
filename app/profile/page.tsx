@@ -43,6 +43,13 @@ export default async function ProfilePage() {
             <h1 className="text-3xl font-bold tracking-tight text-niner-white sm:text-4xl">
               {profile?.display_name}
             </h1>
+            {(profile?.first_name || profile?.last_name) && (
+              <p className="mt-1 text-sm text-niner-white/60">
+                {[profile?.first_name, profile?.last_name]
+                  .filter(Boolean)
+                  .join(" ")}
+              </p>
+            )}
             <p className="mt-2 text-sm text-niner-white/70">{user.email}</p>
           </div>
 
