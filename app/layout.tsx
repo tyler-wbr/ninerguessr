@@ -7,6 +7,10 @@ export const metadata: Metadata = {
   title: "Niner Guessr",
   description:
     "A GeoGuessr-style game for the UNC Charlotte campus. Drop pins, score points, climb the leaderboard.",
+  icons: {
+    icon: "/images/logos/logo-icon.png",
+    apple: "/images/logos/logo-icon.png",
+  },
 };
 
 export const viewport: Viewport = {

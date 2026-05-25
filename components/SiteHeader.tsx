@@ -1,5 +1,6 @@
 import Link from "next/link";
 import SignOutButton from "@/components/SignOutButton";
+import NinerGuessrLogo from "@/components/NinerGuessrLogo";
 import type { Profile } from "@/lib/supabase/types";
 
 export default function SiteHeader({
@@ -11,10 +12,8 @@ export default function SiteHeader({
 }) {
   return (
     <header className="border-b-4 border-niner-gold bg-niner-green text-niner-white">
-      <div className="mx-auto max-w-6xl px-4 py-3 flex items-center justify-between">
-        <Link href="/" className="font-bold text-lg tracking-tight">
-          Niner Guessr
-        </Link>
+      <div className="mx-auto max-w-6xl px-4 py-3 flex items-center justify-between gap-4">
+        <NinerGuessrLogo variant="horizontal" />
         <nav className="flex items-center gap-4 text-sm">
           <Link
             href="/leaderboard"

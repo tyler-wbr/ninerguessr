@@ -5,6 +5,7 @@ import HeroAuthButtons from "@/components/HeroAuthButtons";
 import HeroButton from "@/components/HeroButton";
 import HowToPlay from "@/components/HowToPlay";
 import HomeDailyStatsBar from "@/components/HomeDailyStatsBar";
+import NinerGuessrLogo from "@/components/NinerGuessrLogo";
 
 const DIFFICULTIES = [
   { id: "easy", label: "Play Easy" },
@@ -25,14 +26,21 @@ export default async function HomePage() {
   ]);
 
   return (
-    <HeroLayout topRight={<HeroAuthButtons user={user} profile={profile} />}>
+    <HeroLayout
+      topLeft={false}
+      topRight={<HeroAuthButtons user={user} profile={profile} />}
+    >
       <div className="flex min-h-[100dvh] flex-col items-center justify-center px-4 py-[max(5rem,env(safe-area-inset-top))] pb-[env(safe-area-inset-bottom)] sm:px-6">
         <div className="w-full max-w-sm">
-          <div className="hero-copy-panel text-center">
-            <h1 className="text-4xl font-bold tracking-tight text-niner-white sm:text-5xl">
-              Niner Guessr
-            </h1>
-            <p className="mt-3 text-sm font-medium text-niner-white/95 sm:text-base">
+          <div className="hero-copy-panel hero-copy-panel-home text-center">
+            <div className="flex justify-center">
+              <NinerGuessrLogo
+                variant="stacked"
+                priority
+                className="w-64 sm:w-72 -mb-4"
+              />
+            </div>
+            <p className="mt-1 text-sm font-medium text-niner-white/95 sm:text-base">
               Know Your Campus? Prove It.
             </p>
             <HomeDailyStatsBar stats={dailyStats} />

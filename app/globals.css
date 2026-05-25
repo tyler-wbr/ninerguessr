@@ -115,6 +115,10 @@ body {
     @apply rounded-2xl bg-niner-green/75 px-6 py-5 backdrop-blur-md ring-1 ring-niner-white/10;
   }
 
+  .hero-copy-panel-home {
+    @apply overflow-visible px-5 pb-3 pt-4 sm:px-6 sm:pb-4 sm:pt-5;
+  }
+
   .hero-text-link {
     @apply text-sm font-medium text-niner-gold underline decoration-niner-gold/50 underline-offset-4 transition-colors hover:text-niner-white hover:decoration-niner-gold;
   }
@@ -128,6 +132,11 @@ body {
     .play-round-photo {
       @apply object-cover;
     }
+  }
+
+  /* Logos ship on black; blend into Charlotte Green backgrounds */
+  .logo-on-dark {
+    mix-blend-mode: screen;
   }
 
   .hero-input {
